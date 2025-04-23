@@ -1,0 +1,287 @@
+/*
+
+Adapted for mice fast spiking spinal (L5) motoneurons from Balbi, 2013
+
+Marta Krumina, 2025
+*/
+soma distance(0,0)
+
+objref secref, secref2, term, sl, secmed, box3, box4, gr3
+strdef lab
+strdef med_dend
+
+proc ca_chan() {  // assigns the values of the conductances of L_Ca and kca2
+    forsec secmed {
+	        insert L_Ca
+	              gcabar_L_Ca = $1 * 0.6
+	              tau_m_L_Ca=60
+	              theta_m_L_Ca = -40
+            insert kca2
+	              g_kca2 = $2 * 0.6
+	              depth2_kca2 = 200
+	              taur2_kca2 = 60
+            
+            // subroutine to reduce dendritic PIC areas
+            
+            flag1 = 0
+            loc1 = 0
+            loc2 = 1
+            if (distance(0)<min_d) { flag1 = 2 }
+            
+            for(x,0) {
+            	if ((flag1==0)&&(distance(x)>max_d)) {
+            		loc1=x
+            		flag1=1
+            	}
+            	if ((flag1==2)&&(distance(x)>min_d)) {
+            		loc1=x
+            		flag1=3
+            	}
+            	if ((flag1==3)&&(distance(x)>max_d)) {
+            		loc2=x
+            		flag1=4
+            	}
+            }
+
+            //   |  ----|----  
+            if (flag1==1) { 
+            	gcabar_L_Ca(0:loc1)=$1*0.6:$1*0.6
+            	gcabar_L_Ca(loc1:1)=0:0
+            	g_kca2(0:loc1)=$2*0.6:$2*0.6
+            	g_kca2(loc1:1)=0:0
+            }
+            
+            //   ----|----  |	
+            if (flag1==3) { 
+            	gcabar_L_Ca(0:loc1)=0:0
+            	gcabar_L_Ca(loc1:1)=$1*0.6:$1*0.6
+            	g_kca2(0:loc1)=0:0
+            	g_kca2(loc1:1)=$2*0.6:$2*0.6
+            }
+	        
+            //   --|----|--	
+            if (flag1==4) {
+            	gcabar_L_Ca(0:loc1)=0:0
+            	gcabar_L_Ca(loc1:loc2)=$1*0.6:$1*0.6
+            	gcabar_L_Ca(loc2:1)=0:0
+            	g_kca2(0:loc1)=0:0
+            	g_kca2(loc1:loc2)=$2*0.6:$2*0.6
+            	g_kca2(loc2:1)=0:0
+            }
+            
+            // |  --------  |
+
+    }
+
+	// subroutine to calculate the midpoint (one) of dendritic calcium channels
+    // med_dend string for section name, secref2 reference to section
+    // (used by the activation variables graph)
+	
+	med_d = (min_d + max_d)/2
+	in = 0
+
+	forsec secmed for(x,0) {
+		if ((distance(x)>=(med_d-5))&&(distance(x)<=(med_d+5))&&(in==0)) {
+			secref2 = new SectionRef()
+			index = x
+			sprint(med_dend,"%s",secname())	
+			in = in + 1
+		}
+	}
+}
+
+proc soma_mech() {
+	forsec "soma" {
+		Ra=70
+		cm=1
+		insert pas
+			g_pas=0.0025
+			e_pas=-72
+		insert na3rp
+			gbar_na3rp=0.025 // original value 0.044
+			sh_na3rp=0      // original value 5
+			ar_na3rp=0.4
+		insert naps
+			gbar_naps=0.0035  // original value 0.00044
+			sh_naps=15		 // original value 0
+			ar_naps=0.4
+		insert kdrRL
+			gMax_kdrRL=0.035  // original value 0.07
+		insert gh
+			ghbar_gh = 0.0001325
+			half_gh=-75
+		insert mAHP
+			gcamax_mAHP = 8e-06
+			gkcamax_mAHP = 0.01 // original value 0.0076
+			taur_mAHP = 56.6666666666667
+		insert extracellular xraxial=1e9 xg=1e10 xc=0
+	}
+}
+
+proc dend_mech() {
+	forsec "dend" {
+		Ra=70
+		cm=1
+                
+        nseg = 2*int(L/40)+1 // L/nseg max 20 micron
+
+		insert pas
+			g_pas = 7.22e-05
+			e_pas = -72
+		insert na3rp
+			gbar_na3rp = 2e-4
+			sh_na3rp = 0	// original value 5
+			ar_na3rp = 0.4
+		insert naps
+			gbar_naps = 1.5e-5
+			sh_naps = 15	// original value 0
+			ar_naps = 0.4
+		insert kdrRL
+			gMax_kdrRL = 3.5e-4
+		insert gh
+			ghbar_gh = 1.325e-4
+			half_gh = -75
+		insert extracellular xraxial=1e9 xg=1e10 xc=0
+	}
+}
+
+proc prim_mech() {
+	sl=new SectionList() // variable list of primary dendritic trunks
+	soma sl.children() // stores primary dendritic trunks (plus soma)
+	forsec sl {
+		ifsec "soma" {
+			sl.remove()  // remove soma[1] from the list of primary dendrites
+		
+			print "tronchi dendritici primari: sl"
+			sl.printnames()  // flag per debugging
+			print ""
+		}
+	}
+		
+	forsec sl { // particular values for the primary dendritic trunks, later modified
+			gbar_na3rp = 0.015  // 0.044
+			gbar_naps = 0.002   // 0.00044
+			gMax_kdrRL = 0.035    // 0.07
+		insert mAHP
+			gcamax_mAHP = 8e-06
+			gkcamax_mAHP = 0.01  // original value 0.0076
+			taur_mAHP = 56.6666666666667
+
+	}
+	
+	term=new Vector() //  vector for distances from the soma of the terminal branches
+	
+	forsec "dend" {
+		secref=new SectionRef()
+		if (secref.nchild==0) {  // terminal branches, without children
+	
+			term.append(distance(1))
+		}
+	}
+
+	// subroutine to limit the distribution of ion channels on primary dendrites
+    // (similar to soma) to 10% of the average length of the dendrites
+	
+	print "\nReduction of primary dendrites: "
+	
+	forsec sl {
+		ind = 0
+		for(x,0) {
+			if ((distance(x)>=(term.mean()*0.1))&&(ind==0)) {
+				gbar_na3rp(0:x) = 0.015:0.015		//
+				gbar_na3rp(x:1) = 1.5e-4:1.5e-4
+				gbar_naps(0:x) = 0.002:0.002  	//
+				gbar_naps(x:1) = 1.5e-5:1.5e-5
+				gMax_kdrRL(0:x) = 0.035:0.035	//
+				gMax_kdrRL(x:1) = 3e-4:3e-4
+				gcamax_mAHP(0:x) = 8e-6:8e-6
+				gcamax_mAHP(x:1) = 0:0
+				gkcamax_mAHP(0:x) = 0.01:0.01		//
+				gkcamax_mAHP(x:1) = 0:0
+				ind = 1
+				print secname(), "(", x, ")"
+			}
+		}
+	}
+	
+}
+
+// routine for inserting calcium channels into midline dendrites
+
+proc med_mech() {
+	min_d=$1*term.mean()
+	max_d=$2*term.mean()
+	print "\nmin L_Ca dist.= ", min_d  // minimum distance from the pack of the 'middle' branches
+	print "max L_Ca dist.= ", max_d  // maximum distance from pack of 'middle' branches
+	print ""
+
+	secmed=new SectionList()
+	forsec "dend" {
+	       flag = 0
+	       for(x) if((flag==0)&&((distance(x)>=min_d)&&(distance(x)<=max_d))) {
+	              flag = flag + 1
+                  secmed.append
+                  }
+    }
+
+    ca_chan(2.8e-4,1.6e-4)
+}
+
+// display graphics
+
+proc disp1() {
+
+	box3 = new VBox()
+	box3.intercept(1)
+	gr1 = new Graph()
+	gr1.size(0,300,-80,40)
+	gr1.addvar("soma.v(.5)")
+	graphList[0].append(gr1)
+	gr2 = new Graph()
+	gr2.size(0,300,-80,40)
+	sprint(lab,"%s.v(%g)",med_dend,index)
+	gr2.label(.5,1)
+	gr2.addvar(lab,"secref2.sec.v(index)",3,1)
+	graphList[0].append(gr2)
+	box3.intercept(0)
+	box3.map("Voltage",850,25,350,600)
+
+	box4 = new VBox()
+	box4.intercept(1)
+	gr3 = new Graph()
+	gr3.size(0,300,0,1)
+	sprint(lab,"%s.m_L_Ca(%g)",med_dend,index)
+	gr3.label(.5,1)
+	gr3.addvar(lab,"secref2.sec.m_L_Ca(index)",3,1)
+	sprint(lab,"%s.n_kca2(%g)",med_dend,index)
+	gr3.addvar(lab,"secref2.sec.n_kca2(index)",1,1)
+	graphList[0].append(gr3)
+	box4.intercept(0)
+	box4.map("States",500,400,350,300)
+}
+
+soma_mech()          // insert mechanisms in soma
+dend_mech()          // insert mechanisms in dendrites
+prim_mech()          // insert mechanisms in primary dendrites
+med_mech(0.30,0.60)  // conductance of dendritic calcium channels at medium distance from soma
+
+// disp1()              // plots
+
+print "\nca_chan() varies the conductances of L_Ca ($1) and kca2 ($2)"
+print " base values: 2.8e-4 and 1.6e-4\n"
+
+
+// various parameters for .mod files
+
+tmin_kdrRL = 0.6
+taumax_kdrRL = 15
+qinf_na3rp = 4.8
+thinf_na3rp = -50.5
+Rd_na3rp = 0.05
+qd_na3rp = 1.3
+qg_na3rp = 1.3
+thi1_na3rp = -35
+thi2_na3rp = -35
+vslope_naps = 6
+V0 = -3.88888888888889
+
