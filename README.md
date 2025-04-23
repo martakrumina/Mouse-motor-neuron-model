@@ -9,4 +9,4 @@ Electric field stimulation modulated neuronal excitability in a direction and mo
 and asymmetry were associated with larger changes in excitability. Notably, the alignment of the field with the dendritic axis significantly enhanced polarization effects. 
 These findings were consistent across the mouse morphologies, but varied in magnitude, highlighting morphology-specific responses relevant to ALS modeling.
 
-To run the code you will need the NEURON simulation environment and python jupiter notebook. Download the attached folder and run the jupyther notebook file, you might need to re-run the first line of code twice in order to fully complie the .mod files before continuing to run the simulations themselves. 
+To run the code you will need the NEURON simulation environment and python jupiter notebook. Download the attached folder and run the jupyther notebook file, you might need to re-run the first line of code twice in order to fully compile the .mod files before continuing to run the simulations themselves. 
