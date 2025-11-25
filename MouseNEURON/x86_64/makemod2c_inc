@@ -1,0 +1,56 @@
+./ghchan.c: ../ghchan.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "ghchan.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./ghchan.o: ./ghchan.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./kca2.c: ../kca2.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "kca2.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./kca2.o: ./kca2.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./kdrRL.c: ../kdrRL.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "kdrRL.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./kdrRL.o: ./kdrRL.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./L_Ca.c: ../L_Ca.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "L_Ca.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./L_Ca.o: ./L_Ca.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./mAHP.c: ../mAHP.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "mAHP.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./mAHP.o: ./mAHP.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./na3rp.c: ../na3rp.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "na3rp.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./na3rp.o: ./na3rp.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./naps.c: ../naps.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "naps.mod" -o "/home/user/Desktop/Mouse-motor-neuron-model-main/MouseNEURON/x86_64")
+
+./naps.o: ./naps.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+

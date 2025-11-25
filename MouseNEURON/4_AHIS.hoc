@@ -1,0 +1,56 @@
+/*
+
+Adapted for mice fast spiking spinal (L5) motoneurons from Balbi, 2013
+
+Marta Krumina, 2025
+*/
+create AH
+create IS
+
+IS {
+	nseg = 9
+	diam = 2.2
+	L = 35
+	Ra = 70
+	cm = 1
+	
+	insert pas
+		g_pas = 0.003
+		e_pas = -72
+	insert na3rp
+		gbar_na3rp = 0.6 // original value 0.65
+		sh_na3rp = 0	 // original value 5
+		ar_na3rp = 0.4
+	insert naps
+		gbar_naps = 0.015 // original value 0.013
+		sh_naps = 15	 // original value 0
+		ar_naps = 0.4
+	insert kdrRL
+		gMax_kdrRL = 0.48 // original value 0.4
+	insert extracellular xraxial=1e9 xg=1e10 xc=0
+}
+
+AH {
+	nseg = 7
+	diam(0:1) = soma.diam:IS.diam
+	L = 18
+	Ra = 70
+	cm = 1
+
+	insert pas
+		g_pas = 0.003
+		e_pas = -72
+	insert na3rp
+		gbar_na3rp(0:1) = 0.018:0.36  //
+		sh_na3rp = 0
+		ar_na3rp = 0.4
+	insert naps
+		gbar_naps(0:1) = 0.0025:0.013  //
+		sh_naps = 15
+		ar_naps = 0.4
+	insert kdrRL
+		gMax_kdrRL(0:1) = 0.04:0.48    //
+	insert extracellular xraxial=1e9 xg=1e10 xc=0
+}
+
+connect IS(0), AH(1)

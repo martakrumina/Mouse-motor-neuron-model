@@ -1,0 +1,71 @@
+/*
+
+Adapted for mice fast spiking spinal (L5) motoneurons from Balbi, 2013
+
+Marta Krumina, 2025
+*/
+// List of variables used in this file,
+// declared in previously executed files:
+//
+// sl: list of primary dendrites (file 3)
+// secmed: list of medium dendrites (dendrites with channels for the PIC) (file 3)
+// term: vector of distances of terminal dendrites from soma[0] (file 3)
+// min_d, max_d: minimum and maximum distances of medium dendrites (file 3)
+
+// load_file("fixnseg.hoc")  // calculation of nseg based on d_lambda
+// geom_nseg()
+
+print ""
+print "Morphometric data from ", curr_mod, ":"
+print ""
+
+sect_num = 0 // number of sections
+segm_num = 0 // number of compartments
+area_tot = 0
+forall {
+sect_num = sect_num + 1
+	for(x) {
+		segm_num = segm_num + 1
+		area_tot = area_tot + area(x)
+	}
+}
+
+area_soma = 0
+forsec "soma" {
+	for(x) {area_soma = area_soma + area(x)}
+}
+
+area_dend = 0
+sect_dend = 0
+segm_dend = 0
+forsec "dend" {
+	sect_dend = sect_dend + 1
+	for(x) {
+		area_dend = area_dend + area(x)
+		segm_dend = segm_dend + 1
+	}
+}
+
+diam_dend = 0
+diam_equi = 0
+forsec sl {
+	diam_dend = diam_dend + diam(0)
+	diam_equi = diam_equi + diam(0)^(3/2)
+}
+print "number of model sections: ", sect_num
+print "number of model compartments: ", segm_num
+print "number of dendritic sections: ", sect_dend
+print "number of dendritic compartments: ", segm_dend
+print "total surface area: ", area_tot, " micron2"
+print "somatic surface area: ", area_soma, " micron2"
+print "dendrite surface area: ", area_dend, " micron2"
+print "dendrite area/soma area ratio: ", area_dend/area_soma
+print "soma diameter: ", soma[0].diam, " micron"
+print "total diameter of primary dendrites: ", diam_dend, " micron"
+print "somatic equivalent cylinder diameter: ", soma[0].diam^(3/2), " micron"
+print "dendritic equivalent cylinder diameter: ", diam_equi, " micron"
+print "soma-dendrites equiv diameter deviation: ", soma[0].diam^(3/2)-diam_equi, " micron"
+print "average distance of terminations from soma: ", term.mean(), " micron"
+print "minimum distance of terminations from soma: ", term.min(), " micron"
+print "maximum distance of terminations from soma: ", term.max(), " micron"
+
