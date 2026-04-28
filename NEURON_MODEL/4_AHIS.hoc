@@ -1,0 +1,101 @@
+/*
+
+Adapted for mice fast spiking spinal (L5) motoneurons from Balbi, 2013
+
+Marta Krumina, 2025
+*/
+create AH
+create IS
+
+IS {
+	nseg = 9
+	diam = 2.2
+	L = 35
+	Ra = 70
+	cm = 1
+	
+	insert pas
+		g_pas = 0.0011
+		e_pas =  -69
+	insert na3rp
+		gbar_na3rp = 0.35 // 0.55
+		sh_na3rp = 5 
+		ar_na3rp = 0.4
+	insert naps
+		gbar_naps = 0.0035 // 0.0042
+		sh_naps = 15 
+		ar_naps = 0.4
+	insert kdrRL
+		gMax_kdrRL =  0.48  //0.52
+	insert extracellular xraxial=1e9 xg=1e10 xc=0
+}
+
+AH {
+	nseg = 7
+	diam(0:1) = soma.diam:IS.diam
+	L = 18
+	Ra = 70
+	cm = 1
+
+	insert pas
+		g_pas = 0.0011
+		e_pas = -69
+	insert na3rp
+		gbar_na3rp(0:1) = 0.015:0.35 // 0.03:0.55 
+		sh_na3rp = 5
+		ar_na3rp = 0.4 
+	insert naps
+		gbar_naps(0:1) = 0.00095:0.0035 // 0.00088:0.0042
+		sh_naps = 15
+		ar_naps = 0.4
+	insert kdrRL
+		gMax_kdrRL(0:1) =  0.04:0.48 // 0.042:0.52 
+	insert extracellular xraxial=1e9 xg=1e10 xc=0
+}
+
+connect AH(0), soma(0)
+connect IS(0), AH(1)
+
+// Build AH and IS starting exactly at the soma's distal 3D point,
+// then extend strictly along +x (y and z held constant).
+proc build_AH_IS_along_x_from_soma() { local i, x0, y0, z0, d0, LAH, LIS, dIS
+    // Ensure soma has 3D points
+    access soma
+    if (n3d() == 0) {
+        define_shape()
+    }
+
+    // Soma distal point (soma(0))
+    i  = n3d() - 1
+    x0 = x3d(i)
+    y0 = y3d(i)
+    z0 = z3d(i)
+    d0 = diam3d(i)
+
+    // Capture AH length
+    access AH
+    LAH = L
+
+    // Capture IS length and diameter
+    access IS
+    LIS = L
+    dIS = diam // uniform in your spec
+
+    // Geometry: AH along +x from soma distal point
+    access AH
+    pt3dclear()
+    pt3dadd(x0,        y0, z0, d0)   // start at soma(1)
+    pt3dadd(x0 + LAH,  y0, z0, dIS)  // end of AH
+
+    // Geometry: IS continues along +x
+    access IS
+    pt3dclear()
+    pt3dadd(x0 + LAH,          y0, z0, dIS)
+    pt3dadd(x0 + LAH + LIS,    y0, z0, dIS)
+
+    // Recompute derived geometry
+    define_shape()
+}
+
+// Build once (you can call again after changing L/diam if needed)
+build_AH_IS_along_x_from_soma()
